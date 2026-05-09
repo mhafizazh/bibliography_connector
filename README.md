@@ -1,3 +1,5 @@
+# Project Structure
+```
 bibliography_connector/
 │
 ├── bibliography_connector/
@@ -19,3 +21,29 @@ bibliography_connector/
 ├── config.yaml
 ├── pyproject.toml
 └── README.md
+```
+
+# Usage
+Create virtual environment
+```
+python3 -m venv venv
+```
+activate virtual environment 
+```
+source venv/bin/activate
+```
+run sync command 
+```
+bibliography_connector sync
+```
+
+### expected output 
+```
+Fetching bibliography...
+Fetched 6 items
+Processed 6 items
+Export complete
+```
+
+# Note
+This is just initial proof of concept
