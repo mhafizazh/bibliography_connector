@@ -28,6 +28,10 @@ Create virtual environment
 ```
 python3 -m venv venv
 ```
+install dependencies
+```
+pip install .
+```
 activate virtual environment 
 ```
 source venv/bin/activate
