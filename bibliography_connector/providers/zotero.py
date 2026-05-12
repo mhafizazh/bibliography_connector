@@ -3,7 +3,7 @@ import httpx
 class ZoteroProvider:
     def __init__(self, group_id, collection):
         self.group_id = group_id
-        self.collection = collection
+        self.root_collection = root_collection
 
     def fetch(self):
         url = (
