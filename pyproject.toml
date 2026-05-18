@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bibliography_connector"
+version = "0.2.0"
+description = "CLI tool to sync Zotero bibliography items to Hugo markdown files"
+dependencies = [
+    "typer[all]",
+    "rich",
+    "httpx",
+    "pyyaml",
+    "pyzotero"
+]
+
+[project.scripts]
+bibliography_connector = "bibliography_connector.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["bibliography_connector*"]
