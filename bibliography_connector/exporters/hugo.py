@@ -9,9 +9,9 @@ class HugoExporter:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         for item in items:
             filename = self.output_dir / f"{item['key']}.md"
-            title = item.get("title", "").replace('"', '\\"')
-            date = self._parse_date(item.get("date", ""))
-            url = item.get("url", "")
+            title = (item.get("title") or "").replace('"', '\\"')
+            date = self._parse_date(item.get("date") or "")
+            url = item.get("url") or ""
             content = f"""---
 title: "{title}"
 date: "{date}"
@@ -23,7 +23,7 @@ URL: {url}
             json.dumps(items, indent=2),
             encoding="utf-8"
         )
-        
+
     @staticmethod
     def _parse_date(date_str):
         if not date_str:
