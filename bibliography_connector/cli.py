@@ -1,6 +1,6 @@
 import typer
 import yaml
-
+import os
 from rich import print
 
 from bibliography_connector.providers.zotero import ZoteroProvider
@@ -15,16 +15,17 @@ def main():
     pass
 
 @app.command("sync")
-def sync(config_path: str = "config.yaml"):
-
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
+def sync(
+    groupid: str = typer.Option(..., "--groupid", "-g", help="zotero group id value"),
+    collection: str = typer.Option(..., "--collectionid", "-c", help="zotero collection id value"),
+    output: str = typer.Option(..., "--outdir", "-o", help="output path destination")     
+):
 
     print("[cyan]Fetching bibliography...[/cyan]")
 
     provider = ZoteroProvider(
-        group_id=config["source"]["group_id"],
-        collection=config["source"]["collection"]
+        group_id=groupid,
+        collection=collection
     )
 
     raw_items = provider.fetch()
@@ -36,8 +37,8 @@ def sync(config_path: str = "config.yaml"):
     print(f"[yellow]Processed {len(items)} items[/yellow]")
 
     exporter = HugoExporter(
-        output_dir=config["output"]["markdown_dir"],
-        json_file=config["output"]["json_file"]
+        output_dir=output,
+        json_file=os.path.join(output, "bibliography.json")
     )
 
     exporter.export(items)
