@@ -6,10 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "bibliography_connector"
 version = "0.1.0"
 dependencies = [
-    "typer[all]",
-    "rich",
-    "httpx",
-    "pyyaml"
 ]
 
 [project.scripts]
