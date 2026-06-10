@@ -3,9 +3,10 @@
 bibliography_connector/
 │
 ├── bibliography_connector/
-│   ├── cli.py
-│   ├── config.py
-│   │
+│   ├── cli/
+│   │   └── __init__.py
+│   │   └── cmd_sync.py
+│   │   └── main.py
 │   ├── providers/
 │   │   └── zotero.py
 │   │
@@ -18,7 +19,6 @@ bibliography_connector/
 │   │
 │   └── pipeline.py
 │
-├── config.yaml
 ├── pyproject.toml
 └── README.md
 ```
@@ -36,18 +36,21 @@ activate virtual environment
 ```
 source venv/bin/activate
 ```
-run sync command 
+run sync all command 
 ```
-bibliography_connector sync
+bibliography_connector sync all --groupid 2914042 --collectionid FSK5IX4F --outdir ./output
 ```
-
-### expected output 
+expected output 
 ```
 Fetching bibliography...
-Fetched 6 items
-Processed 6 items
-Export complete
+Fetched 479 items
+Processed 392 items
 ```
+run sync year XXXX
+```
+bibliography_connector sync year 1999 --groupid 2914042 --collectionid FSK5IX4F --outdir ./1999_output
+```
+
 
 # Note
 This is just initial proof of concept
