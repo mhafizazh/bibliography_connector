@@ -5,7 +5,17 @@ class ZoteroProvider:
         self.group_id = group_id
         self.collection = collection
 
-    def fetch(self):
+    def _fetch_items(self, collection_key, **kwargs):
         zot = Zotero(library_id=self.group_id, library_type="group")
-        items = zot.everything(zot.top())
+        items = zot.everything(zot.collection_items_top(collection_key, **kwargs))
+        for sub in zot.everything(zot.collections_sub(collection_key)):
+            sub_key = sub.get("data", {}).get("key")
+            if sub_key:
+                items.extend(self._fetch_items(sub_key, **kwargs))
         return items
+
+    def fetch(self, **kwargs):
+        if self.collection:
+            return self._fetch_items(self.collection, **kwargs)
+        zot = Zotero(library_id=self.group_id, library_type="group")
+        return zot.everything(zot.top(**kwargs))
