@@ -2,7 +2,8 @@ import typer
 import os
 from rich import print
 from bibliography_connector.providers.zotero import ZoteroProvider
-from bibliography_connector.pipeline import run_pipeline
+from bibliography_connector.transforms.clean import clean_items
+from bibliography_connector.transforms.remdup import remdup_items
 from bibliography_connector.exporters.hugo import HugoExporter
 
 # app = typer.Typer(help="Bibliography connector CLI")
@@ -12,7 +13,8 @@ sync_app = typer.Typer(help="Sync bibliography from Zotero")
 
 # @sync_app.callback()
 def _run_sync(raw_items, outdir, suffix=""):
-    items = run_pipeline(raw_items)
+    items = clean_items(raw_items)
+    items = remdup_items(items)
     print(f"Processed {len(items)} items")
     HugoExporter(
         output_dir=outdir,
@@ -47,8 +49,6 @@ def sync_by_year(
     print("Fetching bibliography...")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
     raw_items = provider.fetch(q=str(year), qmode="titleCreatorYear")
-    print(f"Fetched {len(raw_items)} items")
-    
     filtered = [i for i in raw_items if str(year) in (i.get("data", {}).get("date") or "")]
-    print(f"Filtered down to {len(raw_items)} items for year {year}")
-    _run_sync(raw_items, output, suffix=f"_{year}")
+    print(f"Fetched {len(filtered)} items")
+    _run_sync(filtered, output, suffix=f"_{year}")
