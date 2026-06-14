@@ -5,12 +5,12 @@ import json
 def test_fetch_collection_recursive():
     group_id = "2914042"
     collection = "FSK5IX4F"
-    provider = ZoteroProvider(group_id, collection)
+    bib_collection = ZoteroProvider(group_id, collection)
     all_items = []
     all_collections = []
     try:
-        ret = provider.fetch()
-        print(ret)   
+        bib_collection.fetch()
+        print(bib_collection.get_items())   
         
         # if len(all_items) > 5:
         #     print(f"\n... and {len(all_items) - 5} more items")
