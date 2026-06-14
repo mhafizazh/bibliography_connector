@@ -12,7 +12,7 @@ sync_app = typer.Typer(help="Sync bibliography from Zotero")
 
 # @sync_app.callback()
 def _run_sync(raw_items, outdir, suffix=""):
-    items = run_pipeline(raw_items)
+    items = run_pipeline(raw_items) # this should returned cleaned items
     print(f"Processed {len(items)} items")
     HugoExporter(
         output_dir=outdir,
@@ -27,14 +27,14 @@ def sync_all(
 ):
     print("[cyan]Fetching bibliography...[/cyan]")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
-    raw_items = provider.fetch()
+    provider.fetch()
 
     # import json
     # with open("debug_raw.json", "w") as f:
     #     json.dump(raw_items, f, indent=2)
 
-    print(f"Fetched {len(raw_items)} items")
-    _run_sync(raw_items, output)
+    print(f"Fetched {len(provider.items)} items")
+    _run_sync(provider.items, output)
 
 @sync_app.command("year")
 def sync_by_year(
@@ -46,9 +46,9 @@ def sync_by_year(
     """Sync bibliography for a specific publication year"""
     print("Fetching bibliography...")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
-    raw_items = provider.fetch(q=str(year), qmode="titleCreatorYear")
-    print(f"Fetched {len(raw_items)} items")
+    provider.fetch(q=str(year), qmode="titleCreatorYear")
+    print(f"Fetched {len(provider.items)} items")
     
-    filtered = [i for i in raw_items if str(year) in (i.get("data", {}).get("date") or "")]
-    print(f"Filtered down to {len(raw_items)} items for year {year}")
-    _run_sync(raw_items, output, suffix=f"_{year}")
+    filtered = [i for i in provider.items if str(year) in (i.get("data", {}).get("date") or "")]
+    print(f"Filtered down to {len(provider.items)} items for year {year}")
+    _run_sync(provider.items, output, suffix=f"_{year}")

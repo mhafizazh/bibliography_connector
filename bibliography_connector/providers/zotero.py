@@ -4,6 +4,7 @@ class ZoteroProvider:
     def __init__(self, group_id, collection):
         self.group_id = group_id
         self.collection = collection
+        self.items = []
 
     def _fetch_items(self, collection_key, **kwargs):
         zot = Zotero(library_id=self.group_id, library_type="group")
@@ -15,7 +16,4 @@ class ZoteroProvider:
         return items
 
     def fetch(self, **kwargs):
-        if self.collection:
-            return self._fetch_items(self.collection, **kwargs)
-        zot = Zotero(library_id=self.group_id, library_type="group")
-        return zot.everything(zot.top(**kwargs))
+        self.items = self._fetch_items(self.collection, **kwargs)
