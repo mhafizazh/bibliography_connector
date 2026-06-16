@@ -28,13 +28,15 @@ def sync_all(
     print("[cyan]Fetching bibliography...[/cyan]")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
     provider.fetch()
+    
 
     # import json
     # with open("debug_raw.json", "w") as f:
     #     json.dump(raw_items, f, indent=2)
 
-    print(f"Fetched {len(provider.items)} items")
-    _run_sync(provider.items, output)
+    print(f"Fetched {len(provider.cleaned_items)} items")
+    print(provider.cleaned_items)
+    _run_sync(provider.cleaned_items, output)
 
 @sync_app.command("year")
 def sync_by_year(
@@ -47,8 +49,8 @@ def sync_by_year(
     print("Fetching bibliography...")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
     provider.fetch(q=str(year), qmode="titleCreatorYear")
-    print(f"Fetched {len(provider.items)} items")
+    print(f"Fetched {len(provider.cleaned_items)} items")
     
-    filtered = [i for i in provider.items if str(year) in (i.get("data", {}).get("date") or "")]
-    print(f"Filtered down to {len(provider.items)} items for year {year}")
-    _run_sync(provider.items, output, suffix=f"_{year}")
+    filtered = [i for i in provider.cleaned_items if str(year) in (i.get("data", {}).get("date") or "")]
+    print(f"Filtered down to {len(provider.cleaned_items)} items for year {year}")
+    _run_sync(provider.cleaned_items, output, suffix=f"_{year}")

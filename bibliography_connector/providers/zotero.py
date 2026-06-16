@@ -15,17 +15,26 @@ class ZoteroProvider:
             if sub_key:
                 items.extend(self._fetch_items(sub_key, **kwargs))
         return items
-
-    def _semiflatten(self):
-        pass 
-    
+   
     def _clean_fields(self):
-        pass
+        """
+        remove empty fields
+        """
+        for item in self.items:
+            flat = {"key": item["key"], "version": item["version"]}
+            flat.update(item["data"])
+            cleaned = {}
+            for key, value in flat.items():
+                if value == "" or value == None or value == [] or value == {} or value == '':
+                    continue
+                cleaned[key] = value
+            self.cleaned_items.append(cleaned)
     
     def _remdup(self):
         pass
 
     def _url_consolidate(self):
+        pass
 
     def _clean_abstract(self):
         pass
@@ -39,6 +48,7 @@ class ZoteroProvider:
         
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)
+        self._clean_fields()
 
     def transform(self):
         pass
