@@ -27,6 +27,6 @@ URL: {url}
     @staticmethod
     def _parse_date(date_str):
         if not date_str:
-            return "1970-01-01"
+            return "00-00-00"
         match = re.search(r'\b(\d{4})\b', date_str)
-        return f"{match.group(1)}-01-01" if match else "1970-01-01"
+        return f"{match.group(1)}-01-01" if match else "00-00-00"
