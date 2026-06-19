@@ -10,10 +10,6 @@ bibliography_connector/
 │   ├── providers/
 │   │   └── zotero.py
 │   │
-│   ├── transforms/
-│   │   ├── clean.py
-│   │   └── remdup.py
-│   │
 │   ├── exporters/
 │   │   └── hugo.py
 │   │
