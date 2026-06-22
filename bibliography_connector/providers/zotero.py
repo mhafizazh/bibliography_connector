@@ -29,6 +29,7 @@ class ZoteroProvider:
                     continue
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
+        # self._remdup(self.cleaned_items)
     
     def _remdup(self):
         pass
