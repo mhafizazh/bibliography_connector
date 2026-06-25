@@ -1,5 +1,6 @@
 from pyzotero import Zotero
 from dateutil import parser
+from datetime import date
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -51,6 +52,15 @@ class ZoteroProvider:
     
     def _add_author_strings(self):
         pass
+
+    @staticmethod 
+    def filter_by_date(items, target_date, precision):
+        if precision == "day":
+            return [i for i in items if isinstance(i.get("date"), date) and i["date"] == target_date]
+        elif precision == "month":
+            return [i for i in items if isinstance(i.get("date"), date) and i["date"].year == target_date.year and i["date"].month == target_date.month]
+        else:  # year
+            return [i for i in items if isinstance(i.get("date"), date) and i["date"].year == target_date.year]
         
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)
