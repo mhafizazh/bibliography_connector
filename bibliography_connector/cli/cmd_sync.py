@@ -2,7 +2,7 @@ import typer
 import os
 from rich import print
 from bibliography_connector.providers.zotero import ZoteroProvider
-from bibliography_connector.pipeline import run_pipeline
+# from bibliography_connector.pipeline import run_pipeline
 from bibliography_connector.exporters.hugo import HugoExporter
 
 # app = typer.Typer(help="Bibliography connector CLI")
@@ -12,12 +12,12 @@ sync_app = typer.Typer(help="Sync bibliography from Zotero")
 
 # @sync_app.callback()
 def _run_sync(raw_items, outdir, suffix=""):
-    items = run_pipeline(raw_items) # this should returned cleaned items
-    print(f"Processed {len(items)} items")
+    # items = run_pipeline(raw_items) # this should returned cleaned items
+    print(f"Processed {len(raw_items)} items")
     HugoExporter(
         output_dir=outdir,
         json_file=os.path.join(outdir, f"bibliography{suffix}.json"),
-    ).export(items)
+    ).export(raw_items)
 
 @sync_app.command("all")
 def sync_all(
