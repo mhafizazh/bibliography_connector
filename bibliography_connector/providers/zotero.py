@@ -1,4 +1,5 @@
 from pyzotero import Zotero
+from dateutil import parser
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -27,9 +28,14 @@ class ZoteroProvider:
             for key, value in flat.items():
                 if value == "" or value == None or value == [] or value == {} or value == '':
                     continue
+                if key == 'date':
+                    try: 
+                        value = parser.parse(value).date()
+                    except (ValueError, TypeError):
+                        pass
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
-        # self._remdup(self.cleaned_items)
+
     
     def _remdup(self):
         pass
@@ -45,7 +51,6 @@ class ZoteroProvider:
     
     def _add_author_strings(self):
         pass
-
         
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)

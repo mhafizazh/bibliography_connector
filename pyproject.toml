@@ -11,7 +11,8 @@ dependencies = [
     "rich",
     "httpx",
     "pyyaml",
-    "pyzotero"
+    "pyzotero",
+    "python-dateutil"
 ]
 
 [project.scripts]
