@@ -29,10 +29,25 @@ class ZoteroProvider:
                     continue
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
-        # self._remdup(self.cleaned_items)
+        self._remdup()
     
     def _remdup(self):
-        pass
+        seen_keys = set()
+        seen_titles = set()
+        deduped = []
+        for item in self.cleaned_items:
+            key = item.get("key")
+            title = item.get("title")
+            if key and key in seen_keys:
+                continue
+            if title and title in seen_titles:
+                continue
+            if key:
+                seen_keys.add(key)
+            if title:
+                seen_titles.add(title)
+            deduped.append(item)
+        self.cleaned_items = deduped
 
     def _url_consolidate(self):
         pass
