@@ -2,17 +2,19 @@ import typer
 import os
 from rich import print
 from bibliography_connector.providers.zotero import ZoteroProvider
-# from bibliography_connector.pipeline import run_pipeline
+from datetime import date, datetime
 from bibliography_connector.exporters.hugo import HugoExporter
+from bibliography_connector.utils import parse_date_input
 
-# app = typer.Typer(help="Bibliography connector CLI")
+
 
 sync_app = typer.Typer(help="Sync bibliography from Zotero")
-# app.add_typer(sync_app, name="sync")
 
-# @sync_app.callback()
+
+
+
+
 def _run_sync(raw_items, outdir, suffix=""):
-    # items = run_pipeline(raw_items) # this should returned cleaned items
     print(f"Processed {len(raw_items)} items")
     HugoExporter(
         output_dir=outdir,
@@ -23,34 +25,35 @@ def _run_sync(raw_items, outdir, suffix=""):
 def sync_all(
     groupid: str = typer.Option(..., "--groupid", "-g", help="zotero group id value"),
     collection: str = typer.Option(..., "--collectionid", "-c", help="zotero collection id value"),
-    output: str = typer.Option(..., "--outdir", "-o", help="output path destination")     
+    output: str = typer.Option(..., "--outdir", "-o", help="output path destination")
 ):
     print("[cyan]Fetching bibliography...[/cyan]")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
     provider.fetch()
-    
-
-    # import json
-    # with open("debug_raw.json", "w") as f:
-    #     json.dump(raw_items, f, indent=2)
-
+ 
     print(f"Fetched {len(provider.cleaned_items)} items")
-    print(provider.cleaned_items)
     _run_sync(provider.cleaned_items, output)
 
-@sync_app.command("year")
-def sync_by_year(
-    year: int = typer.Argument(..., help="Publication year to filter by"),
+
+
+@sync_app.command("date")
+def sync_by_date(
+    date_str: str = typer.Argument(..., help="publication by date"),
     groupid: str = typer.Option(..., "--groupid", "-g", help="zotero group id value"),
     collection: str = typer.Option(..., "--collectionid", "-c", help="zotero collection id value"),
-    output: str = typer.Option(..., "--outdir", "-o", help="output path destination")     
+    output: str = typer.Option(..., "--outdir", "-o", help="output path destination")
 ):
-    """Sync bibliography for a specific publication year"""
+    """Sync bibliography for a specific publication date"""
     print("Fetching bibliography...")
     provider = ZoteroProvider(group_id=groupid, collection=collection)
-    provider.fetch(q=str(year), qmode="titleCreatorYear")
+    date, precision = parse_date_input(date_str)
+
+    target = date
+
+    provider.fetch(q=str(target.year), qmode="titleCreatorYear")
     print(f"Fetched {len(provider.cleaned_items)} items")
-    
-    filtered = [i for i in provider.cleaned_items if str(year) in (i.get("data", {}).get("date") or "")]
-    print(f"Filtered down to {len(provider.cleaned_items)} items for year {year}")
-    _run_sync(provider.cleaned_items, output, suffix=f"_{year}")
+
+    filtered = ZoteroProvider.filter_by_date(provider.cleaned_items, target, precision)
+
+    print(f"Filtered down to {len(filtered)} items for date {target}")
+    _run_sync(filtered, output, suffix=f"_{target}")

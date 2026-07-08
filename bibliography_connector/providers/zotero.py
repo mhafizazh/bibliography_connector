@@ -1,4 +1,6 @@
 from pyzotero import Zotero
+from dateutil import parser
+from datetime import date
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -27,6 +29,11 @@ class ZoteroProvider:
             for key, value in flat.items():
                 if value == "" or value == None or value == [] or value == {} or value == '':
                     continue
+                if key == 'date':
+                    try: 
+                        value = parser.parse(value).date()
+                    except (ValueError, TypeError):
+                        pass
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
         self._remdup()
@@ -58,7 +65,6 @@ class ZoteroProvider:
             url = item.get("url")
             doi = item.get("DOI")
             if url:
-                print("make it lower case")
                 item['url'] = url.lower()
             elif not url and doi:
                 doi = doi.lstrip("/")
@@ -91,6 +97,14 @@ class ZoteroProvider:
     def _add_author_strings(self):
         pass
 
+    @staticmethod 
+    def filter_by_date(items, target_date, precision):
+        if precision == "day":
+            return [i for i in items if isinstance(i.get("date"), date) and i["date"] == target_date]
+        elif precision == "month":
+            return [i for i in items if isinstance(i.get("date"), date) and i["date"].year == target_date.year and i["date"].month == target_date.month]
+        else:  # year
+            return [i for i in items if isinstance(i.get("date"), date) and i["date"].year == target_date.year]
         
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)

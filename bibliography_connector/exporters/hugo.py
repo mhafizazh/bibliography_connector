@@ -1,6 +1,14 @@
 from pathlib import Path
 import json
 import re
+from datetime import date
+
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, date):
+            return obj.isoformat()
+        return super().default(obj)
+
 class HugoExporter:
     def __init__(self, output_dir, json_file):
         self.output_dir = Path(output_dir)
@@ -10,7 +18,7 @@ class HugoExporter:
         for item in items:
             filename = self.output_dir / f"{item['key']}.md"
             title = (item.get("title") or "").replace('"', '\\"')
-            date = self._parse_date(item.get("date") or "")
+            date = item.get("date")
             url = item.get("url") or ""
             content = f"""---
 title: "{title}"
@@ -20,13 +28,7 @@ URL: {url}
 """
             filename.write_text(content, encoding="utf-8")
         self.json_file.write_text(
-            json.dumps(items, indent=2),
+            json.dumps(items, indent=2, cls=DateEncoder),
             encoding="utf-8"
         )
 
-    @staticmethod
-    def _parse_date(date_str):
-        if not date_str:
-            return "00-00-00"
-        match = re.search(r'\b(\d{4})\b', date_str)
-        return f"{match.group(1)}-01-01" if match else "00-00-00"
