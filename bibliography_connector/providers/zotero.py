@@ -36,13 +36,57 @@ class ZoteroProvider:
                         pass
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
-
+        self._remdup()
     
     def _remdup(self):
-        pass
+        seen_keys = set()
+        seen_titles = set()
+        deduped = []
+        for item in self.cleaned_items:
+            key = item.get("key")
+            title = item.get("title")
+            if key and key in seen_keys:
+                continue
+            if title and title in seen_titles:
+                continue
+            if key:
+                seen_keys.add(key)
+            if title:
+                seen_titles.add(title)
+            deduped.append(item)
+        self.cleaned_items = deduped
 
     def _url_consolidate(self):
-        pass
+        """
+        it will make URL lowercase, and if there is not URL use DOI url
+        propagates child URLs up to parent item
+        """
+        for item in self.cleaned_items:
+            url = item.get("url")
+            doi = item.get("DOI")
+            if url:
+                item['url'] = url.lower()
+            elif not url and doi:
+                doi = doi.lstrip("/")
+                item['url'] = f"https://doi.org/{doi}"
+            
+        child_urls = {}
+        for item in self.cleaned_items:
+            parent_key = item.get("parentItem")
+            if parent_key and item.get("url"):
+                if parent_key not in child_urls:
+                    child_urls[parent_key] = item["url"]
+        for item in self.cleaned_items:
+            if not item.get("url") and item.get("key") in child_urls:
+                item["url"] = child_urls[item["key"]]
+
+        self.cleaned_items = [i for i in self.cleaned_items if "parentItem" not in i]
+
+    def _fetch_child_items(self, item_keys):
+        zot = Zotero(library_id=self.group_id, library_type="group")
+        for key in item_keys:
+            children = zot.everything(zot.children(key))
+            self.items.extend(children)
 
     def _clean_abstract(self):
         pass
@@ -64,7 +108,10 @@ class ZoteroProvider:
         
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)
+        parent_keys = [item["data"]["key"] for item in self.items]
+        self._fetch_child_items(parent_keys)
         self._clean_fields()
+        self._url_consolidate()
 
     def transform(self):
         pass
