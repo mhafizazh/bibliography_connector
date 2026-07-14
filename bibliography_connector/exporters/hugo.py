@@ -2,9 +2,12 @@ from pathlib import Path
 import json
 import re
 from datetime import date
+from edtf.parser.parser_classes import EDTFObject
 
 class DateEncoder(json.JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, EDTFObject):
+            return str(obj)
         if isinstance(obj, date):
             return obj.isoformat()
         return super().default(obj)
