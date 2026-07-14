@@ -11,9 +11,6 @@ from bibliography_connector.utils import parse_date_input
 sync_app = typer.Typer(help="Sync bibliography from Zotero")
 
 
-
-
-
 def _run_sync(raw_items, outdir, suffix=""):
     print(f"Processed {len(raw_items)} items")
     HugoExporter(
@@ -55,5 +52,5 @@ def sync_by_date(
 
     filtered = ZoteroProvider.filter_by_date(provider.cleaned_items, target, precision)
 
-    print(f"Filtered down to {len(filtered)} items for date {target}")
+    print(f"Filtered down to {len(filtered)}")
     _run_sync(filtered, output, suffix=f"_{target}")

@@ -1,6 +1,7 @@
 from pyzotero import Zotero
-from dateutil import parser
-from datetime import date
+from edtf import parse_edtf
+from edtf.parser.edtf_exceptions import EDTFParseException
+from edtf.parser.parser_classes import Date, Interval, UncertainOrApproximate
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -30,9 +31,9 @@ class ZoteroProvider:
                 if value == "" or value == None or value == [] or value == {} or value == '':
                     continue
                 if key == 'date':
-                    try: 
-                        value = parser.parse(value).date()
-                    except (ValueError, TypeError):
+                    try:
+                        value = parse_edtf(value)
+                    except (EDTFParseException, ValueError, TypeError):
                         pass
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
@@ -97,14 +98,41 @@ class ZoteroProvider:
     def _add_author_strings(self):
         pass
 
-    @staticmethod 
+    @staticmethod
+    def _unwrap_date(d):
+        if isinstance(d, UncertainOrApproximate):
+            return d.date
+        return d
+
+    @staticmethod
     def filter_by_date(items, target_date, precision):
-        if precision == "day":
-            return [i for i in items if isinstance(i.get("date"), date) and i["date"] == target_date]
-        elif precision == "month":
-            return [i for i in items if isinstance(i.get("date"), date) and i["date"].year == target_date.year and i["date"].month == target_date.month]
-        else:  # year
-            return [i for i in items if isinstance(i.get("date"), date) and i["date"].year == target_date.year]
+        def _get_date(item):
+            d = item.get("date")
+            if d is None:
+                return None
+            if isinstance(d, (UncertainOrApproximate,)):
+                d = d.date
+            if isinstance(d, Date):
+                return d
+            return None
+
+        def _match(edtf_date, td, prec):
+            y = int(edtf_date.year)
+            m = int(edtf_date.month) if edtf_date.month is not None else None
+            d = int(edtf_date.day) if edtf_date.day is not None else None
+            if prec == "day":
+                return y == td.year and m == td.month and d == td.day
+            elif prec == "month":
+                return y == td.year and m == td.month
+            else:
+                return y == td.year
+
+        results = []
+        for item in items:
+            edtf_date = _get_date(item)
+            if edtf_date is not None and _match(edtf_date, target_date, precision):
+                results.append(item)
+        return results
         
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)
