@@ -1,6 +1,8 @@
 from pyzotero import Zotero
 from dateutil import parser
 from datetime import date
+from edtf import parse_edtf
+from edtf.parser.edtf_exceptions import EDTFParseException
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -31,8 +33,9 @@ class ZoteroProvider:
                     continue
                 if key == 'date':
                     try: 
-                        value = parser.parse(value).date()
-                    except (ValueError, TypeError):
+                        date_format = parser.parse(value).date()
+                        value = parse_edtf(str(date))
+                    except (ValueError, TypeError, EDTFParseException):
                         pass
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
