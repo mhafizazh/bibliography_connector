@@ -26,10 +26,8 @@ class ZoteroProvider:
         remove empty fields
         """
         for item in self.items:
-            flat = {"key": item["key"], "version": item["version"]}
-            flat.update(item["data"])
             cleaned = {}
-            for key, value in flat.items():
+            for key, value in item["data"].items():
                 if value == "" or value == None or value == [] or value == {} or value == '':
                     continue
                 if key == 'date':
@@ -66,11 +64,6 @@ class ZoteroProvider:
 
         self.cleaned_items = [i for i in self.cleaned_items if "parentItem" not in i]
 
-    def _fetch_child_items(self, item_keys):
-        zot = Zotero(library_id=self.group_id, library_type="group")
-        for key in item_keys:
-            children = zot.everything(zot.children(key))
-            self.items.extend(children)
 
     def _clean_abstract(self):
         pass
@@ -120,7 +113,6 @@ class ZoteroProvider:
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)
         parent_keys = [item["data"]["key"] for item in self.items]
-        self._fetch_child_items(parent_keys)
         self._clean_fields()
         self._url_consolidate()
 
