@@ -1,9 +1,10 @@
 from pyzotero import Zotero
 from edtf import parse_edtf
 from edtf.parser.edtf_exceptions import EDTFParseException
-from edtf.parser.parser_classes import Date, Interval, UncertainOrApproximate
+from edtf.parser.parser_classes import Date, UncertainOrApproximate
 import logging 
-
+import re
+from bibliography_connector.utils.date_parser import parse_date_input
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -33,8 +34,11 @@ class ZoteroProvider:
                 if key == 'date':
                     try:
                         value = parse_edtf(value)
-                    except (EDTFParseException, ValueError, TypeError) as e:
-                        logging.debug("Could not parse date '%s': %s", value, e)
+                    except (EDTFParseException, ValueError, TypeError):
+                        try:
+                            value, _ = parse_date_input(value)
+                        except ValueError:
+                            logging.debug(f"Could not parse date {value}")
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
 
@@ -75,20 +79,14 @@ class ZoteroProvider:
         pass
 
     @staticmethod
-    def _unwrap_date(d):
-        if isinstance(d, UncertainOrApproximate):
-            return d.date
-        return d
-
-    @staticmethod
     def filter_by_date(items, target_date, precision):
         def _get_date(item):
             d = item.get("date")
             if d is None:
                 return None
-            if isinstance(d, (UncertainOrApproximate,)):
+            if isinstance(d, UncertainOrApproximate):
                 d = d.date
-            if isinstance(d, Date):
+            if isinstance(d, (Date)):
                 return d
             return None
 
@@ -99,7 +97,7 @@ class ZoteroProvider:
             if prec == "day":
                 return y == td.year and m == td.month and d == td.day
             elif prec == "month":
-                return y == td.year and m == td.month
+                return y == td.year and (m == td.month or m is None)
             else:
                 return y == td.year
 
@@ -109,7 +107,7 @@ class ZoteroProvider:
             if edtf_date is not None and _match(edtf_date, target_date, precision):
                 results.append(item)
         return results
-        
+            
     def fetch(self, **kwargs):
         self.items = self._fetch_items(self.collection, **kwargs)
         parent_keys = [item["data"]["key"] for item in self.items]
