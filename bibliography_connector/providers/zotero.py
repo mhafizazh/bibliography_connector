@@ -26,8 +26,6 @@ class ZoteroProvider:
         remove empty fields
         """
         for item in self.items:
-            # flat = {"key": item["key"], "version": item["version"]}
-            # flat.update(item["data"])
             cleaned = {}
             for key, value in item["data"].items():
                 if value == "" or value == None or value == [] or value == {} or value == '':
