@@ -2,6 +2,8 @@ from pyzotero import Zotero
 from edtf import parse_edtf
 from edtf.parser.edtf_exceptions import EDTFParseException
 from edtf.parser.parser_classes import Date, Interval, UncertainOrApproximate
+import logging 
+
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -33,8 +35,8 @@ class ZoteroProvider:
                 if key == 'date':
                     try:
                         value = parse_edtf(value)
-                    except (EDTFParseException, ValueError, TypeError):
-                        pass
+                    except (EDTFParseException, ValueError, TypeError) as e:
+                        logging.debug("Could not parse date '%s': %s", value, e)
                 cleaned[key] = value
             self.cleaned_items.append(cleaned)
 
