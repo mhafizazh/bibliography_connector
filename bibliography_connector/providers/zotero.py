@@ -5,6 +5,7 @@ from edtf.parser.parser_classes import Date, UncertainOrApproximate
 import logging 
 import re
 from bibliography_connector.utils.date_parser import parse_date_input
+from urllib.parse import urljoin
 
 class ZoteroProvider:
     def __init__(self, group_id, collection):
@@ -44,17 +45,14 @@ class ZoteroProvider:
 
     def _url_consolidate(self):
         """
-        it will make URL lowercase, and if there is not URL use DOI url
+        if there is not URL use DOI url
         propagates child URLs up to parent item
         """
         for item in self.cleaned_items:
             url = item.get("url")
             doi = item.get("DOI")
-            if url:
-                item['url'] = url.lower()
-            elif not url and doi:
-                doi = doi.lstrip("/")
-                item['url'] = f"https://doi.org/{doi}"
+            if not url and doi:
+                item['url'] = urljoin("https://doi.org/", doi)
             
         child_urls = {}
         for item in self.cleaned_items:
