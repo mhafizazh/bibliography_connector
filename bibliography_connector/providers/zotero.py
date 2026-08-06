@@ -14,7 +14,9 @@ class ZoteroProvider:
         self.items = []
         self.cleaned_items = []
 
-    def _fetch_items(self, collection_key, **kwargs):
+    def _fetch_items(self, collection_key, items=None, **kwargs):
+        if items is not None:
+            return items
         zot = Zotero(library_id=self.group_id, library_type="group")
         items = zot.everything(zot.collection_items_top(collection_key, **kwargs))
         for sub in zot.everything(zot.collections_sub(collection_key)):
@@ -106,8 +108,8 @@ class ZoteroProvider:
                 results.append(item)
         return results
             
-    def fetch(self, **kwargs):
-        self.items = self._fetch_items(self.collection, **kwargs)
+    def fetch(self, items=None, **kwargs):
+        self.items = self._fetch_items(self.collection, items=items, **kwargs)
         parent_keys = [item["data"]["key"] for item in self.items]
         self._clean_fields()
         self._url_consolidate()
