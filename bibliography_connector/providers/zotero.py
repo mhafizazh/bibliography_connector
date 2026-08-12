@@ -94,12 +94,15 @@ class ZoteroProvider:
             y = int(edtf_date.year)
             m = int(edtf_date.month) if edtf_date.month is not None else None
             d = int(edtf_date.day) if edtf_date.day is not None else None
+            ty = int(td.year)
+            tm = int(td.month) if td.month is not None else None
+            tdy = int(td.day) if td.day is not None else None
             if prec == "day":
-                return y == td.year and m == td.month and d == td.day
+                return y == ty and m == tm and d == tdy
             elif prec == "month":
-                return y == td.year and (m == td.month or m is None)
+                return y == ty and (m == tm or m is None)
             else:
-                return y == td.year
+                return y == ty
 
         results = []
         for item in items:
