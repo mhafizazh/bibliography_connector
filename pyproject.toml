@@ -12,7 +12,8 @@ dependencies = [
     "httpx",
     "pyyaml",
     "pyzotero",
-    "python-dateutil"
+    "python-dateutil",
+    "edtf>=5.0.0"
 ]
 
 [project.scripts]
